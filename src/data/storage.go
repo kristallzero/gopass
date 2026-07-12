@@ -28,6 +28,33 @@ func (storage *Storage) SaveCredentials() error {
 	return os.WriteFile(passwordsPath, data, 0600)
 }
 
+func (storage *Storage) loginExists(source, login string) bool {
+	for _, credential := range storage.credentials[source] {
+		if credential.Login == login {
+			return true
+		}
+	}
+	return false
+}
+
+func (storage *Storage) AddCredentials(source, login, password string) string {
+	var err error
+	if storage.credentials[source] == nil {
+		storage.credentials[source] = make([]credential, 1)
+		storage.credentials[source][0] = credential{login, password}
+		err = storage.SaveCredentials()
+	} else if storage.loginExists(source, login) {
+		return "the credentials for the source are already exist"
+	} else {
+		storage.credentials[source] = append(storage.credentials[source], credential{login, password})
+		err = storage.SaveCredentials()
+	}
+	if err == nil {
+		return "saved"
+	}
+	return fmt.Sprintf("cannot save credentials due to this: %s", err)
+}
+
 func (storage *Storage) String() string {
 	var result strings.Builder
 	result.WriteString("Credentials:\n")
