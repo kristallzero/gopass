@@ -1,7 +1,7 @@
 package commands
 
-import "gopass/storage"
+import "gopass/data"
 
-func ListCommandHandler(storage *storage.Storage, _ []string) string {
+func ListCommandHandler(storage *data.Storage, _ []string) string {
 	return storage.String()
 }

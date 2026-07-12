@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"gopass/storage"
+	"gopass/data"
 	"strings"
 )
 
-func HelpCommandHandler(commands []command) func(*storage.Storage, []string) string {
-	return func(_ *storage.Storage, _ []string) string {
+func HelpCommandHandler(commands []command) func(*data.Storage, []string) string {
+	return func(_ *data.Storage, _ []string) string {
 		var result strings.Builder
 		result.WriteString("gopass <command>\nor\ngopass\n> <command>\n\ncommands:\n")
 

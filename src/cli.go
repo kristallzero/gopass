@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"gopass/commands"
-	"gopass/storage"
+	"gopass/data"
 	"os"
 	"strings"
 )
@@ -12,7 +12,7 @@ import (
 func main() {
 	fmt.Println("hi, i'm a password manager cli written on golang.\nyou can easily store any password just with one command.\nyou can just write gopass and access to its cli, or use commands, like gopass help.")
 	registeredCommands := commands.GenerateCommands()
-	storage, err := storage.LoadStorage()
+	storage, err := data.LoadStorage()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "cannot run the program due to this:", err)
 		return

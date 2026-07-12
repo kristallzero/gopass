@@ -1,8 +1,8 @@
 package commands
 
-import "gopass/storage"
+import "gopass/data"
 
-func ExitCommandHandler(storage *storage.Storage, _ []string) string {
+func ExitCommandHandler(storage *data.Storage, _ []string) string {
 	storage.SaveCredentials()
 	return "exit"
 }
