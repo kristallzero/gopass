@@ -24,5 +24,9 @@ func main() {
 			fmt.Println(output)
 		}
 	}
-	fmt.Println("bye")
+	if err := scanner.Err(); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("bye")
+	}
 }
