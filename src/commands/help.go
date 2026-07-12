@@ -2,7 +2,7 @@ package commands
 
 import "strings"
 
-func HelpCommandHandler(commands []Command) func(arguments []string) string {
+func HelpCommandHandler(commands []command) func(arguments []string) string {
 	return func(arguments []string) string {
 		var result strings.Builder
 		result.WriteString("gopass <command>\nor\ngopass\n> <command>\n\ncommands:\n")
