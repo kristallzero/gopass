@@ -1,11 +1,14 @@
 package commands
 
-import "slices"
+import (
+	"gopass/storage"
+	"slices"
+)
 
 type command struct {
 	aliases        []string
 	description    string
-	commandHandler func(arguments []string) string
+	commandHandler func(*storage.Storage, []string) string
 }
 
 func GenerateCommands() []command {
@@ -16,11 +19,11 @@ func GenerateCommands() []command {
 	return commands
 }
 
-func FindCorrespondingHandler(commands []command, searchingCommand string) func(arguments []string) string {
+func FindCorrespondingHandler(commands []command, searchingCommand string) func(*storage.Storage, []string) string {
 	for _, command := range commands {
 		if slices.Contains(command.aliases, searchingCommand) {
 			return command.commandHandler
 		}
 	}
-	return func(arguments []string) string { return "command not found" }
+	return func(*storage.Storage, []string) string { return "command not found" }
 }
