@@ -55,6 +55,55 @@ func (storage *Storage) AddCredentials(source, login, password string) string {
 	return fmt.Sprintf("cannot save credentials due to this: %s", err)
 }
 
+func (storage *Storage) GetSources() string {
+	var result strings.Builder
+	result.WriteString("Credentials:\n")
+	for source, credentials := range storage.credentials {
+		fmt.Fprintln(&result, getCredentialsRaw(source, credentials, false))
+	}
+	return result.String()
+}
+
+func (storage *Storage) GetCredentials(source string) string {
+	credentials := storage.credentials[source]
+	if credentials == nil {
+		return "error: source hasn't been found"
+	}
+	return getCredentialsRaw(source, credentials, true)
+}
+
+func (storage *Storage) GetPassword(source, login string) string {
+	credentials := storage.credentials[source]
+	if credentials == nil {
+		return "error: source hasn't been found"
+	}
+	for _, credential := range credentials {
+		if credential.Login == login {
+			return getPasswordRaw(source, login, credential.Password)
+		}
+	}
+	return "error: login hasn't been found"
+}
+
+func getCredentialsRaw(source string, credentials []credential, showPasswords bool) string {
+	if showPasswords && len(credentials) == 1 {
+		return getPasswordRaw(source, credentials[0].Login, credentials[0].Password)
+	}
+	return fmt.Sprintf("  Source: %s\n  Logins: %s\n", source, strings.Join(getLogins(credentials), ", "))
+}
+
+func getPasswordRaw(source, login, password string) string {
+	return fmt.Sprintf("  Source: %s\n  Login: %s\n  Password: %s", source, login, password)
+}
+
+func getLogins(credentials []credential) []string {
+	logins := make([]string, len(credentials))
+	for i, credential := range credentials {
+		logins[i] = credential.Login
+	}
+	return logins
+}
+
 func (storage *Storage) String() string {
 	var result strings.Builder
 	result.WriteString("Credentials:\n")
