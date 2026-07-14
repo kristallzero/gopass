@@ -39,7 +39,7 @@ func (storage *Storage) loginExists(source, login string) bool {
 
 func (storage *Storage) AddCredentials(source, login, password string) string {
 	var err error
-	if storage.credentials[source] == nil {
+	if !storage.SourceExists(source) {
 		storage.credentials[source] = make([]credential, 1)
 		storage.credentials[source][0] = credential{login, password}
 		err = storage.SaveCredentials()
@@ -65,24 +65,65 @@ func (storage *Storage) GetSources() string {
 }
 
 func (storage *Storage) GetCredentials(source string) string {
-	credentials := storage.credentials[source]
-	if credentials == nil {
+	if !storage.SourceExists(source) {
 		return "error: source hasn't been found"
 	}
-	return getCredentialsRaw(source, credentials, true)
+	return getCredentialsRaw(source, storage.credentials[source], true)
 }
 
 func (storage *Storage) GetPassword(source, login string) string {
-	credentials := storage.credentials[source]
-	if credentials == nil {
+	if !storage.SourceExists(source) {
 		return "error: source hasn't been found"
 	}
-	for _, credential := range credentials {
+	for _, credential := range storage.credentials[source] {
 		if credential.Login == login {
 			return getPasswordRaw(source, login, credential.Password)
 		}
 	}
 	return "error: login hasn't been found"
+}
+
+func (storage *Storage) SourceExists(source string) bool {
+	return storage.credentials[source] != nil
+}
+
+func (storage *Storage) IsOneCredential(source string) bool {
+	return len(storage.credentials[source]) == 1
+}
+
+func (storage *Storage) UpdateOneCredential(source, field, value string) string {
+	credential := &storage.credentials[source][0]
+	switch field {
+	case "login":
+		if findCredentials(storage.credentials[source], value) != nil {
+			return fmt.Sprintf("error: new login %s already exists for the source %s", value, source)
+		}
+		credential.Login = value
+	case "password":
+		credential.Password = value
+	default:
+		return fmt.Sprintf("error: %v is not a credential field", field)
+	}
+	return fmt.Sprintf("field %v has been successfully updated", field)
+}
+
+func (storage *Storage) UpdateCredential(source, login, field, value string) string {
+	credential := findCredentials(storage.credentials[source], login)
+	if credential == nil {
+		return "error: login hasn't been found"
+	}
+	switch field {
+	case "login":
+		if findCredentials(storage.credentials[source], value) != nil {
+			return fmt.Sprintf("error: new login %s already exists for the source %s", value, source)
+		}
+		credential.Login = value
+	case "password":
+		credential.Password = value
+	default:
+		return fmt.Sprintf("error: %v is not a credential field", field)
+	}
+	return fmt.Sprintf("field %v has been successfully updated", field)
 }
 
 func getCredentialsRaw(source string, credentials []credential, showPasswords bool) string {
@@ -102,6 +143,15 @@ func getLogins(credentials []credential) []string {
 		logins[i] = credential.Login
 	}
 	return logins
+}
+
+func findCredentials(credentials []credential, login string) *credential {
+	for i := range credentials {
+		if credentials[i].Login == login {
+			return &credentials[i]
+		}
+	}
+	return nil
 }
 
 func (storage *Storage) String() string {

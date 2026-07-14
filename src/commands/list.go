@@ -11,6 +11,6 @@ func ListCommandHandler(storage *data.Storage, arguments []string) string {
 	case 2:
 		return storage.GetPassword(arguments[0], arguments[1])
 	default:
-		return getArgumentsLengthMaximumMessage(len(arguments), 2)
+		return getArgumentsLengthRangeMessage(len(arguments), 0, 2)
 	}
 }
