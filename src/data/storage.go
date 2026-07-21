@@ -126,6 +126,24 @@ func (storage *Storage) UpdateCredential(source, login, field, value string) str
 	return fmt.Sprintf("field %v has been successfully updated", field)
 }
 
+func (storage *Storage) DeleteOneCredential(source string) string {
+	delete(storage.credentials, source)
+	return "credential and source has been deleted"
+}
+
+func (storage *Storage) DeleteCredential(source, login string) string {
+	credentials := storage.credentials[source]
+	credentialIndex := findCredentialsIndex(credentials, login)
+	if credentialIndex == -1 {
+		return "error: login hasn't been found"
+	}
+	if len(credentials) == 1 {
+		return storage.DeleteOneCredential(source)
+	}
+	storage.credentials[source] = append(credentials[:credentialIndex], credentials[credentialIndex+1:]...)
+	return "credential has been deleted"
+}
+
 func getCredentialsRaw(source string, credentials []credential, showPasswords bool) string {
 	if showPasswords && len(credentials) == 1 {
 		return getPasswordRaw(source, credentials[0].Login, credentials[0].Password)
@@ -152,6 +170,15 @@ func findCredentials(credentials []credential, login string) *credential {
 		}
 	}
 	return nil
+}
+
+func findCredentialsIndex(credentials []credential, login string) int {
+	for i := range credentials {
+		if credentials[i].Login == login {
+			return i
+		}
+	}
+	return -1
 }
 
 func (storage *Storage) String() string {
