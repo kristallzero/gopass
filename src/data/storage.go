@@ -104,7 +104,12 @@ func (storage *Storage) UpdateOneCredential(source, field, value string) string 
 	default:
 		return fmt.Sprintf("error: %v is not a credential field", field)
 	}
-	return fmt.Sprintf("field %v has been successfully updated", field)
+
+	if err := storage.SaveCredentials(); err == nil {
+		return fmt.Sprintf("field %v has been successfully updated", field)
+	} else {
+		return fmt.Sprintf("cannot save credentials due to this: %s", err)
+	}
 }
 
 func (storage *Storage) UpdateCredential(source, login, field, value string) string {
@@ -123,12 +128,21 @@ func (storage *Storage) UpdateCredential(source, login, field, value string) str
 	default:
 		return fmt.Sprintf("error: %v is not a credential field", field)
 	}
-	return fmt.Sprintf("field %v has been successfully updated", field)
+
+	if err := storage.SaveCredentials(); err == nil {
+		return fmt.Sprintf("field %v has been successfully updated", field)
+	} else {
+		return fmt.Sprintf("cannot save credentials due to this: %s", err)
+	}
 }
 
 func (storage *Storage) DeleteOneCredential(source string) string {
 	delete(storage.credentials, source)
-	return "credential and source has been deleted"
+	if err := storage.SaveCredentials(); err == nil {
+		return "credential and source has been deleted"
+	} else {
+		return fmt.Sprintf("cannot save credentials due to this: %s", err)
+	}
 }
 
 func (storage *Storage) DeleteCredential(source, login string) string {
@@ -141,7 +155,11 @@ func (storage *Storage) DeleteCredential(source, login string) string {
 		return storage.DeleteOneCredential(source)
 	}
 	storage.credentials[source] = append(credentials[:credentialIndex], credentials[credentialIndex+1:]...)
-	return "credential has been deleted"
+	if err := storage.SaveCredentials(); err == nil {
+		return "credential has been deleted"
+	} else {
+		return fmt.Sprintf("cannot save credentials due to this: %s", err)
+	}
 }
 
 func getCredentialsRaw(source string, credentials []credential, showPasswords bool) string {
